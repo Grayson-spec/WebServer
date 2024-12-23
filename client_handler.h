@@ -2,6 +2,7 @@
 #define CLIENT_HANDLER_H
 
 #include <sys/socket.h>
+#include <netinet/in.h>
 
 // Structure to represent an HTTP request
 typedef struct {
@@ -15,6 +16,7 @@ typedef struct {
     char headers[1000];
     char body[1000];
 } http_response_t;
+
 
 // Function to parse incoming HTTP requests
 http_request_t* parse_http_request(char* request);

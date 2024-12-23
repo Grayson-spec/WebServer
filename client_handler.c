@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
+
 // Function to parse incoming HTTP requests
 http_request_t* parse_http_request(char* request) {
     http_request_t* parsed_request = malloc(sizeof(http_request_t));
@@ -31,6 +32,7 @@ http_response_t* handle_post_request(http_request_t* request) {
     return response;
 }
 
+
 // Function to send HTTP responses
 void send_response(int client_fd, http_response_t* response) {
     char response_string[1000];
@@ -43,7 +45,12 @@ void send_response(int client_fd, http_response_t* response) {
 void handle_client(int client_fd) {
     char request[1000];
     recv(client_fd, request, 1000, 0);
+
     http_request_t* parsed_request = parse_http_request(request);
+    if (parsed_request == NULL)
+    {
+        return;
+    }
 
     http_response_t* response;
     if (strcmp(parsed_request->method, "GET") == 0) {
@@ -52,13 +59,26 @@ void handle_client(int client_fd) {
         response = handle_post_request(parsed_request);
     } else {
         response = malloc(sizeof(http_response_t));
+        if (response == NULL)
+        {
+            return;
+        }
         response->status_code = 405;
         sprintf(response->headers, "Content-Type: text/html\r\n");
         sprintf(response->body, "<html><body>Method Not Allowed!</body></html>");
+
+        if (response != NULL)
+        {
+            send_response(client_fd, response);
+            free(response);
+        }
+
+        free(parsed_request);
     }
 
     send_response(client_fd, response);
     free(parsed_request);
     free(response);
     close(client_fd);
+    
 }
